@@ -31,6 +31,18 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // 1. Spring Web (웹 서버 구동, REST API 및 MVC 환경 제공)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 2. Spring Data JPA (데이터베이스를 자바 코드로 편하게 다루기 위함)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // 3. MariaDB Driver (스프링과 MariaDB가 통신할 수 있게 해주는 번역기)
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    // 4. Spring Security (로그인, 회원가입 등 보안 기능)
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
