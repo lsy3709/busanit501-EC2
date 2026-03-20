@@ -43,6 +43,16 @@ dependencies {
 
     // 4. Spring Security (로그인, 회원가입 등 보안 기능)
 //    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // 5. AWS, s3 서비스
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    // 6. 썸네일
+    implementation 'net.coobird:thumbnailator:0.4.16'
+    // 7.  롬복, 테스트 환경에서 동작하기.
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    // 8. 타임리프
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>S3 보안 업로드 보드</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4>📸 S3 파일 업로드 (5분 보안 링크 적용)</h4>
+    </div>
+    <div class="card-body">
+      <div class="input-group mb-3">
+        <input type="file" class="form-control" id="fileInput" multiple>
+        <button class="btn btn-outline-primary" type="button" id="uploadBtn">업로드 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4" id="uploadResult">
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  // 1. [업로드] 버튼 클릭 시 동작
+  document.querySelector("#uploadBtn").addEventListener("click", function (e) {
+    const formObj = new FormData();
+    const fileInput = document.querySelector("#fileInput");
+    const files = fileInput.files;
+
+    if(files.length === 0) {
+      alert("파일을 선택해주세요!");
+      return;
+    }
+
+    // 선택된 파일들을 formObj에 포장
+    for (let i = 0; i < files.length; i++) {
+      formObj.append("files", files[i]);
+    }
+
+    // 컨트롤러의 /upload 로 전송
+    axios.post('/upload', formObj, {
+      headers: {'Content-Type': 'multipart/form-data'}
+    }).then(res => {
+      const resultList = res.data;
+      // 서버에서 받은 결과 목록을 하나씩 화면에 그리기
+      for (const result of resultList) {
+        showUploadFile(result);
+      }
+      fileInput.value = ''; // 입력창 싹 비워주기
+    }).catch(err => {
+      console.error("업로드 에러:", err);
+    });
+  });
+
+  // 2. [출력] 화면에 이미지 카드를 그려주는 함수
+  function showUploadFile({uuid, fileName, link}) {
+    const uploadResult = document.querySelector("#uploadResult");
+
+    const str = `
+            <div class="col-md-3 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center py-1">
+                        <small class="text-truncate" style="max-width: 150px;">${fileName}</small>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeFile('${link}', this)">X</button>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center p-2">
+                        <img src="/view/${link}" data-src="${link}" class="img-fluid rounded" alt="${fileName}" style="max-height: 200px;">
+                    </div>
+                </div>
+            </div>
+        `;
+    // 이전에 추천해 드렸던 '화면 깜빡임 없는' 부드러운 추가 방식
+    uploadResult.insertAdjacentHTML('beforeend', str);
+  }
+
+  // 3. [삭제] 파일 삭제 함수
+  function removeFile(link, btnElement) {
+    if(!confirm("이 사진을 정말 삭제하시겠습니까? (S3에서도 삭제됩니다)")) return;
+
+    // 컨트롤러의 /remove/파일명 호출
+    axios.delete(`/remove/${link}`)
+            .then(res => {
+              // 화면에서 해당 카드를 감싸고 있는 가장 가까운 div(col-md-3)를 찾아 통째로 날림
+              btnElement.closest('.col-md-3').remove();
+            })
+            .catch(err => {
+              console.error("삭제 에러:", err);
+            });
+  }
+</script>
+</body>
+</html>
